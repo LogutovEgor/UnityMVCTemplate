@@ -5,9 +5,9 @@ using Enums;
 
 public class Application : MonoBehaviour
 {
-    public ApplicationModel appModel { get; private set; }
-    public ApplicationView appView { get; private set; }
-    public ApplicationController appController { get; private set; }
+    public ApplicationModel AppModel { get; private set; }
+    public ApplicationView AppView { get; private set; }
+    public ApplicationController AppController { get; private set; }
 
     void Awake()
     {
@@ -15,12 +15,12 @@ public class Application : MonoBehaviour
     }
     private void Initialize()
     {
-        appModel = GetComponentInChildren<ApplicationModel>();
-        appModel.Initialize();
-        appView = GetComponentInChildren<ApplicationView>();
-        appView.Initialize();
-        appController = GetComponentInChildren<ApplicationController>();
-        appController.Initialize();
+        AppModel = GetComponentInChildren<ApplicationModel>();
+        AppModel.Initialize();
+        AppView = GetComponentInChildren<ApplicationView>();
+        AppView.Initialize();
+        AppController = GetComponentInChildren<ApplicationController>();
+        AppController.Initialize();
     }
     public void Notify(EventName eventName, Object target, params object[] paramsData)
     {
@@ -34,6 +34,10 @@ public class Application : MonoBehaviour
 
         for (int i = 0; i < controllers.Length; i++)
             controllers[i].OnLateNotification(eventName, target, paramsData);
+    }
+    public Object LoadResource(string name)
+    {
+        return Resources.Load(name);
     }
 }
 public abstract class Element : MonoBehaviour
