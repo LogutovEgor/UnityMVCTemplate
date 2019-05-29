@@ -5,9 +5,13 @@ using Enums;
 
 public class Application : MonoBehaviour
 {
+    #region Properties
+
     public ApplicationModel AppModel { get; private set; }
     public ApplicationView AppView { get; private set; }
     public ApplicationController AppController { get; private set; }
+
+    #endregion
 
     void Awake()
     {
@@ -17,23 +21,25 @@ public class Application : MonoBehaviour
     {
         AppModel = GetComponentInChildren<ApplicationModel>();
         AppModel.Initialize();
+        //
         AppView = GetComponentInChildren<ApplicationView>();
         AppView.Initialize();
+        //
         AppController = GetComponentInChildren<ApplicationController>();
         AppController.Initialize();
     }
-    public void Notify(EventName eventName, Object target, params object[] paramsData)
+    public void Notify(EventName eventName, params object[] data)
     {
         Controller[] controllers = FindObjectsOfType<Controller>();
 
         for (int i = 0; i < controllers.Length; i++)
-            controllers[i].OnInitialNotification(eventName, target, paramsData);
+            controllers[i].OnInitialNotification(eventName, data);
 
         for (int i = 0; i < controllers.Length; i++)
-            controllers[i].OnNotification(eventName, target, paramsData);
+            controllers[i].OnNotification(eventName, data);
 
         for (int i = 0; i < controllers.Length; i++)
-            controllers[i].OnLateNotification(eventName, target, paramsData);
+            controllers[i].OnLateNotification(eventName, data);
     }
     public Object LoadResource(string name)
     {
@@ -43,19 +49,21 @@ public class Application : MonoBehaviour
 public abstract class Element : MonoBehaviour
 {
     private Application app;
-    public Application App()
+    public Application App
     {
-        if (app == null)
-            app = FindObjectOfType<Application>();
-        return app;
+        get {
+            if (app == null)
+                app = FindObjectOfType<Application>();
+            return app;
+        }
     }
 }
 public abstract class Controller : Element
 {
-    public abstract void OnInitialNotification(EventName eventName, Object target, params object[] paramsData);
-    public abstract void OnNotification(EventName eventName, Object target, params object[] paramsData);
-    public abstract void OnLateNotification(EventName eventName, Object target, params object[] paramsData);
     public abstract void Initialize();
+    public abstract void OnInitialNotification(EventName eventName, params object[] data);
+    public abstract void OnNotification(EventName eventName, params object[] data);
+    public abstract void OnLateNotification(EventName eventName, params object[] data);
 }
 public abstract class View : Element
 {
