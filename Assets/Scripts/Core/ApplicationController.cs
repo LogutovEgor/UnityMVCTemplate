@@ -10,6 +10,10 @@ public class ApplicationController : Controller
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
+        //
         CanvasController = GetComponentInChildren<CanvasController>();
         CanvasController.Initialize();
         //
@@ -20,17 +24,5 @@ public class ApplicationController : Controller
     {
         if (UnityEngine.Application.targetFrameRate != App.AppModel.TargetFramerate)
             UnityEngine.Application.targetFrameRate = App.AppModel.TargetFramerate;
-    }
-
-    public override void OnInitialNotification(EventName eventName, params object[] data)
-    {
-    }
-
-    public override void OnLateNotification(EventName eventName, params object[] data)
-    {
-    }
-
-    public override void OnNotification(EventName eventName, params object[] data)
-    {
     }
 }

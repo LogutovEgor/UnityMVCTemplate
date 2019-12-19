@@ -9,6 +9,10 @@ public class ApplicationView : View
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
+        //
         CanvasView = GetComponentInChildren<CanvasView>();
         CanvasView.Initialize();
         //

@@ -1,191 +1,215 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
+using LiteDB;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 public class SaveModel : Model
 {
-    private SaveType save;
-
-    public Enums.SaveType saveType;
-    [Header("Cryptography")]
-    public bool cryptography;
-    public string key;
-    public string initializationVector;
-
-    public SaveType Save
+    [SerializeField]
+    public int currentVersion;
+    protected LiteDatabase database;
+    
+    protected enum AttributeName
     {
-        get
-        {
-            if (save == null)
-            {
-                save = new SaveType();
-                string jsonStr = default;
-                switch (saveType)
-                {
-                    case Enums.SaveType.PlayerPrefs:
-                        if (PlayerPrefs.HasKey("Save"))
-                        {
-                            if (cryptography)
-                                jsonStr = DecryptSave(PlayerPrefs.GetString("Save"));
-                            else
-                                jsonStr = PlayerPrefs.GetString("Save");
-
-                            JsonUtility.FromJsonOverwrite(jsonStr, save);
-                        }
-                        else
-                            Save = save;
-                        break;
-                    case Enums.SaveType.File:
-                        if (File.Exists(GetFilePath()))
-                        {
-                            StreamReader streamReader = new StreamReader(GetFilePath());
-                            if (cryptography)
-                                jsonStr = DecryptSave(streamReader.ReadToEnd());
-                            else
-                                jsonStr = streamReader.ReadToEnd();
-                            streamReader.Dispose();
-                            streamReader.Close();
-
-                            JsonUtility.FromJsonOverwrite(jsonStr, save);
-                        }
-                        else
-                        {
-                            Save = save;
-                        }
-                        break;
-                }
-            }
-            return save;
-        }
-        set
-        {
-            save = value;
-            string jsonStr = default;
-            switch (saveType)
-            {
-                case Enums.SaveType.PlayerPrefs:
-                    if (cryptography)
-                        jsonStr = EncryptSave(JsonUtility.ToJson(Save));
-                    else
-                        jsonStr = JsonUtility.ToJson(Save);
-
-                    PlayerPrefs.SetString("Save", jsonStr);
-                    break;
-                case Enums.SaveType.File:
-                    if (cryptography)
-                        jsonStr = EncryptSave(JsonUtility.ToJson(Save));
-                    else
-                        jsonStr = JsonUtility.ToJson(Save);
-
-                    StreamWriter streamWriter = new StreamWriter(GetFilePath());
-                    streamWriter.Write(jsonStr);
-                    streamWriter.Dispose();
-                    streamWriter.Close();
-                    break;
-            }
-        }
+        //Info
+        Version,
+        //Save
+        Coins, 
+        Name,
+        Param1,
+        Param2
     }
 
     public override void Initialize()
     {
-        Save.test++;
-        Debug.Log(Save.test);
-        return;
-        //RijndaelManaged
-        //        Legal min key size = 128
-        //        Legal max key size = 256
-        //        Legal min block size = 128
-        //        Legal max block size = 256
-        // Unicode 1 char - 2 byte
-        // iv size byte = block size / 8 byte
-        // block size - bits
-        //key size  - bits
-        //Debug.Log("key byte size: " + System.Text.Encoding.ASCII.GetByteCount(key));
-        //Debug.Log("iv byte size: " + System.Text.Encoding.ASCII.GetByteCount(initializationVector));
-        string original = JsonUtility.ToJson(Save);
+        if (!File.Exists(GetDatabasePath()))
+            CreateDatabase(currentVersion);
 
-        byte[] iv = System.Text.Encoding.Unicode.GetBytes(initializationVector);
-        byte[] keyBytes = System.Text.Encoding.Unicode.GetBytes(key);
-        // Create a new instance of the Rijndael
-        // class.  This generates a new key and initialization 
-        // vector (IV).
-        using (Rijndael myRijndael = Rijndael.Create())
-        {
-            myRijndael.Key = keyBytes;
-            myRijndael.IV = iv;
-            // Encrypt the string to an array of bytes.
-            byte[] encrypted = RijndaelCryptography.EncryptStringToBytes(original, myRijndael.Key, myRijndael.IV);
+        database = new LiteDatabase(GetDatabasePath());
 
-            // Decrypt the bytes to a string.
-            string roundtrip = RijndaelCryptography.DecryptStringFromBytes(encrypted, myRijndael.Key, myRijndael.IV);
-            Debug.Log("Original: " + original);
-            Debug.Log("roundtrip: " + roundtrip);
-            Debug.Log("Encoded str: " + System.Text.Encoding.Unicode.GetString(encrypted));
-        }
+        int databaseVersion = GetDatabaseVersion();
+
+        if (databaseVersion != currentVersion)
+            ConvertDatabase(currentVersion);
     }
 
-    private string GetFilePath()
+    protected string GetDatabasePath()
     {
-        if ((UnityEngine.Application.platform == RuntimePlatform.WindowsEditor))
-            return UnityEngine.Application.dataPath + "/Save.sav";
+        if (UnityEngine.Application.platform == RuntimePlatform.WindowsEditor)
+            return UnityEngine.Application.dataPath + "/Save.db";
         else
-            return UnityEngine.Application.persistentDataPath + "/Save.sav";
+            return UnityEngine.Application.persistentDataPath + "/Save.db";
     }
-    private string EncryptSave(string decryptedSave)
-    {
-        string encryptedStr = default;
 
-        using (Rijndael myRijndael = Rijndael.Create())
+    protected BsonDocument GetInfo() =>
+        database.GetCollection("Info").FindAll().First();
+
+    public int GetDatabaseVersion() =>
+        GetInfo()["Version"];
+
+    protected BsonDocument GetSave() =>
+        database.GetCollection("Save").FindAll().First();
+
+    public void CreateDatabase(int version)
+    {
+        switch(version)
         {
-            myRijndael.Key = System.Text.Encoding.Unicode.GetBytes(key);
-            myRijndael.IV = System.Text.Encoding.Unicode.GetBytes(initializationVector); ;
-            // Encrypt the string to an array of bytes.
-            byte[] encrypted
-                = RijndaelCryptography.EncryptStringToBytes(decryptedSave, myRijndael.Key, myRijndael.IV);
-
-            encryptedStr = System.Text.Encoding.Unicode.GetString(encrypted);
+            case 1:
+                CreateDatabaseVer1();
+                break;
+            case 2:
+                CreateDatabaseVer2();
+                break;
+            case 3:
+                CreateDatabaseVer3();
+                break;
         }
-        return encryptedStr;
     }
-    private string DecryptSave(string encryptedSave)
-    {
-        string decryptedStr = default;
 
-        using (Rijndael myRijndael = Rijndael.Create())
+    protected void CreateDatabaseVer1()
+    {
+        using (LiteDatabase database = new LiteDatabase(GetDatabasePath()))
         {
-            myRijndael.Key
-                = System.Text.Encoding.Unicode.GetBytes(key);
-            myRijndael.IV
-                = System.Text.Encoding.Unicode.GetBytes(initializationVector);
-            // Encrypt the string to an array of bytes.
-
-            byte[] encrypted = System.Text.Encoding.Unicode.GetBytes(encryptedSave);
-
-            decryptedStr = RijndaelCryptography.DecryptStringFromBytes(encrypted, myRijndael.Key, myRijndael.IV);
+            BsonDocument info = new BsonDocument
+            {
+                { "Version", 1 }
+            };
+            //
+            BsonDocument save = new BsonDocument
+            {
+                { "Coins", 0 },
+                { "Name", "<none>" }
+            };
+            //
+            LiteCollection<BsonDocument> collectionInfo = database.GetCollection<BsonDocument>("Info");
+            collectionInfo.Insert(info);
+            //
+            LiteCollection<BsonDocument> collectionSave = database.GetCollection<BsonDocument>("Save");
+            collectionSave.Insert(save);
         }
-        return decryptedStr;
     }
 
-    private void OnApplicationQuit()
+    protected void CreateDatabaseVer2()
     {
-        Save = save;
-    }
-    private void OnApplicationPause(bool pause)
-    {
-        Save = save;
-    }
-
-    [System.Serializable]
-    public class SaveType
-    {
-        public int test;
-
-        public SaveType()
+        using (LiteDatabase database = new LiteDatabase(GetDatabasePath()))
         {
-            test = 0;
+            BsonDocument info = new BsonDocument
+            {
+                { "Version", 2 }
+            };
+            //
+            BsonDocument save = new BsonDocument
+            {
+                { "Coins", 0 },
+                { "Name", "<none>" },
+                { "Param1", 100 }
+            };
+            //
+            LiteCollection<BsonDocument> collectionInfo = database.GetCollection<BsonDocument>("Info");
+            collectionInfo.Insert(info);
+            //
+            LiteCollection<BsonDocument> collectionSave = database.GetCollection<BsonDocument>("Save");
+            collectionSave.Insert(save);
         }
+    }
+
+    protected void CreateDatabaseVer3()
+    {
+        using (LiteDatabase database = new LiteDatabase(GetDatabasePath()))
+        {
+            BsonDocument info = new BsonDocument
+            {
+                { "Version", 3 }
+            };
+            //
+            BsonDocument save = new BsonDocument
+            {
+                { "Coins", 0 },
+                { "Name", "<none>" },
+                { "Param1", 100 },
+                { "Param2", 99.9f }
+            };
+            //
+            LiteCollection<BsonDocument> collectionInfo = database.GetCollection<BsonDocument>("Info");
+            collectionInfo.Insert(info);
+            //
+            LiteCollection<BsonDocument> collectionSave = database.GetCollection<BsonDocument>("Save");
+            collectionSave.Insert(save);
+        }
+    }
+
+    public void DeleteDatabase()
+    {
+        database.Dispose();
+        if (File.Exists(GetDatabasePath()))
+            File.Delete(GetDatabasePath());
+    }
+    //public Save GetSave()
+    //{
+    //    return database.GetCollection<Save>("save").FindAll().First();
+    //}
+
+    //public Info GetInfo()
+    //{
+    //    return database.GetCollection<Info>("info").FindAll().First();
+    //}
+
+    public string SaveToString()
+    {
+        return GetSave().ToString();
+    }
+
+    public string InfoToString()
+    {
+        //StringBuilder stringBuilder = new StringBuilder().Append("info =>").AppendLine();
+        //BsonDocument doc = GetInfo();
+        //foreach (var keyValue in doc)
+        //    stringBuilder.AppendLine($"Key: {keyValue.Key} Value: {keyValue.Value }");
+        return GetInfo().ToString();//stringBuilder.ToString();
+    }
+
+    public void ConvertDatabase(int version)
+    {
+        if (GetDatabaseVersion() != version - 1)
+            ConvertDatabase(version - 1);
+        //
+        if (GetDatabaseVersion() == 1 && version == 2)
+            ConvertDatabaseFrom1To2();
+        else if (GetDatabaseVersion() == 2 && version == 3)
+            ConvertDatabaseFrom2To3();
+    }
+
+    protected void ConvertDatabaseFrom1To2()
+    {
+        LiteCollection<BsonDocument> collectionInfo = database.GetCollection<BsonDocument>("Info");
+        BsonDocument infoDoc = collectionInfo.FindAll().First();
+        infoDoc["Version"] = 2;
+        collectionInfo.Update(infoDoc);
+        //
+        LiteCollection<BsonDocument> collectionSave = database.GetCollection<BsonDocument>("Save");
+        BsonDocument doc = collectionSave.FindAll().First();
+        doc.Add("Param1", 1.1f);
+        collectionSave.Update(doc);
+    }
+
+    protected void ConvertDatabaseFrom2To3()
+    {
+        LiteCollection<BsonDocument> collectionInfo = database.GetCollection<BsonDocument>("Info");
+        BsonDocument infoDoc = collectionInfo.FindAll().First();
+        infoDoc["Version"] = 3;
+        collectionInfo.Update(infoDoc);
+        //
+        LiteCollection<BsonDocument> collectionSave = database.GetCollection<BsonDocument>("Save");
+        BsonDocument doc = collectionSave.FindAll().First();
+        doc.Add("Param2", 1.2f);
+        collectionSave.Update(doc);
+    }
+
+    public void OnApplicationQuit()
+    {
+        database.Dispose();
     }
 }

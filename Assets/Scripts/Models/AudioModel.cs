@@ -8,5 +8,8 @@ public class AudioModel : Model
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
     }
 }

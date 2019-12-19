@@ -6,5 +6,8 @@ public class CanvasView : View
 {
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
     }
 }

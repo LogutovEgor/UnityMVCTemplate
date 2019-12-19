@@ -8,6 +8,10 @@ public class AudioView : View
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
+        //
         AudioSource1 = GetComponent<AudioSource>();
     }
 }

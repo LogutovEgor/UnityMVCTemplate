@@ -12,6 +12,10 @@ public class ApplicationModel : Model
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
+        //
         SaveModel = GetComponentInChildren<SaveModel>();
         SaveModel.Initialize();
         //

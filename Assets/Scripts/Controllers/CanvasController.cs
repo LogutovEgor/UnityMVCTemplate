@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using Enums;
 using UnityEngine;
 using System.Reflection;
+using System.Linq;
 
 public class CanvasController : Controller
 {
     public override void Initialize()
     {
-        ShowPanel(App.AppModel.CanvasModel.panel1Prefab);
-        ShowPanel(App.AppModel.CanvasModel.panel2Prefab);
+        if (initialized)
+            return;
+        initialized = true;
+        //
+        //ShowPanel(PanelName.DebugSavePanel);
     }
 
-    public void ShowPanel(GameObject panelPrefab)
+    public void ShowPanel(PanelName panelName)
     {
+        GameObject panelPrefab = GetPanelPrefab(panelName);
         GameObject panel = Instantiate(panelPrefab, App.AppView.CanvasView.transform);
         panel.GetComponent<PanelViewController>().Initialize();
 
@@ -29,68 +34,57 @@ public class CanvasController : Controller
 
         if (App.AppModel.CanvasModel.Panels.Count > 0)
         {
-            foreach (GameObject temp in App.AppModel.CanvasModel.Panels)
-                temp.SetActive(false);
+            //foreach (GameObject temp in App.AppModel.CanvasModel.Panels)
+            //if(temp.GetComponent<PanelViewController>().deactivate)
+            //temp.SetActive(false);
 
-            prevCanvas = App.AppModel.CanvasModel.Panels.Peek().GetComponent<Canvas>();
+            GameObject prevPanel = App.AppModel.CanvasModel.Panels.Peek();
+            prevPanel.GetComponent<Animator>().SetTrigger("Hide");
+            prevPanel.GetComponent<PanelViewController>().destroyOnHide = false;
+            //prevPanel.SetActive(!prevPanel.GetComponent<PanelViewController>().deactivate);
+            prevCanvas = prevPanel.GetComponent<Canvas>();
         }
         else
-        {
             prevCanvas = App.AppView.CanvasView.GetComponent<Canvas>();
-        }
+
         panelCanvas.sortingOrder = prevCanvas.sortingOrder + 1;
         App.AppModel.CanvasModel.Panels.Push(panel);
     }
     public void HidePanel(GameObject panel)
     {
         GameObject temp = App.AppModel.CanvasModel.Panels.Peek();
-        if(temp == panel)
+        if (temp == panel)
         {
-            if(App.AppModel.CanvasModel.Panels.Count == 1)
-                return;
-
+            //if (App.AppModel.CanvasModel.Panels.Count == 1)
+                //return;
+            
             App.AppModel.CanvasModel.Panels.Pop();
-            Destroy(panel);
-            App.AppModel.CanvasModel.Panels.Peek().SetActive(true);
-        }
-    }
-
-    /*private PanelViewController GetPanelPrefab(PanelName panelName)
-    {
-        // Get prefab dynamically, based on public fields set from Unity
-        // You can use private fields with SerializeField attribute too
-        var fields = App
-            .AppModel
-            .CanvasModel
-            .GetType()
-            .GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-        foreach (var field in fields)
-        {
-            var prefab = field.GetValue(this) as T;
-            if (prefab != null)
+            //Destroy(panel);
+            //App.AppModel.CanvasModel.Panels.Peek().SetActive(true);
+            panel.GetComponent<Animator>().SetTrigger("Hide");
+            panel.GetComponent<PanelViewController>().destroyOnHide = true;
+            //panel.GetComponent<Canvas>().sortingOrder -= 2;
+            if (App.AppModel.CanvasModel.Panels.Count > 0)
             {
-                return prefab;
+                App.AppModel.CanvasModel.Panels.Peek().GetComponent<Animator>().SetTrigger("Show");
+                App.AppModel.CanvasModel.Panels.Peek().SetActive(true);
             }
         }
-
-        throw new MissingReferenceException("Prefab not found for type " + typeof(T));
-    }*/
-
-
-    #region Event handlers
-
-    public override void OnInitialNotification(EventName eventName, params object[] data)
-    {
     }
 
-    public override void OnLateNotification(EventName eventName, params object[] data)
+    public GameObject GetPanelPrefab(PanelName panelName)
     {
+        FieldInfo[] fields = App
+          .AppModel
+          .CanvasModel
+          .GetType()
+          .GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+        GameObject prefab
+            = fields
+            .First(info => info.Name == panelName.ToString())
+            .GetValue(App.AppModel.CanvasModel) as GameObject;
+
+        return prefab;
     }
-
-    public override void OnNotification(EventName eventName, params object[] data)
-    {
-
-    }
-
-    #endregion
 }

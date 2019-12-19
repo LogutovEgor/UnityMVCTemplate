@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class CanvasModel : Model
 {
-    public GameObject panel1Prefab;
-    public GameObject panel2Prefab;
+    public GameObject DebugSavePanel;
 
     public Stack<GameObject> Panels { get; set; }
 
     public override void Initialize()
     {
+        if (initialized)
+            return;
+        initialized = true;
+        //
         Panels = new Stack<GameObject>();
     }
 }
