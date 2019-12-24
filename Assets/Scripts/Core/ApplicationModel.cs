@@ -8,7 +8,7 @@ public class ApplicationModel : Model
     public CanvasModel CanvasModel { get; private set; }
     public AudioModel AudioModel { get; private set; }
 
-    public int TargetFramerate { get; set; }
+    public int TargetFramerate;// { get; set; }
 
     public override void Initialize()
     {
@@ -16,14 +16,14 @@ public class ApplicationModel : Model
             return;
         initialized = true;
         //
-        SaveModel = GetComponentInChildren<SaveModel>();
-        SaveModel.Initialize();
+        //SaveModel = GetComponentInChildren<SaveModel>();
+        //SaveModel.Initialize();
         //
-        CanvasModel = GetComponentInChildren<CanvasModel>();
-        CanvasModel.Initialize();
+        //CanvasModel = GetComponentInChildren<CanvasModel>();
+        //CanvasModel.Initialize();
         //
-        AudioModel = GetComponentInChildren<AudioModel>();
-        AudioModel.Initialize();
+        //AudioModel = GetComponentInChildren<AudioModel>();
+        //AudioModel.Initialize();
         //
         TargetFramerate = 60;
     }

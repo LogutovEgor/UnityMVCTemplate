@@ -12,7 +12,7 @@ public class DebugSavePanel : PanelViewController, ISelfInitialize
 
     public override void Initialize()
     {
-        base.Initialize();
+        //base.Initialize();
         //
         databaseVersionTextComponent = databaseVersionText.GetComponent<Text>();
         currentVersionTextComponent = currentVersionText.GetComponent<Text>();

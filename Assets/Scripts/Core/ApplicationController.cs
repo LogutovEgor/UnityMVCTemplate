@@ -14,11 +14,11 @@ public class ApplicationController : Controller
             return;
         initialized = true;
         //
-        CanvasController = GetComponentInChildren<CanvasController>();
-        CanvasController.Initialize();
+        //CanvasController = GetComponentInChildren<CanvasController>();
+        //CanvasController.Initialize();
         //
-        AudioController = GetComponentInChildren<AudioController>();
-        AudioController.Initialize();
+        //AudioController = GetComponentInChildren<AudioController>();
+        //AudioController.Initialize();
     }
     protected void Update()
     {

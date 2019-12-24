@@ -34,14 +34,38 @@ public class Application : MonoBehaviour
     private void Initialize()
     {
         AppModel = GetComponentInChildren<ApplicationModel>();
-        AppModel.Initialize();
+        InitializeProperties(AppModel);
         //
         AppView = GetComponentInChildren<ApplicationView>();
-        AppView.Initialize();
+        InitializeProperties(AppView);
         //
         AppController = GetComponentInChildren<ApplicationController>();
-        AppController.Initialize();
+        InitializeProperties(AppController);
     }
+
+    //Initialize all of child Elements of obj
+    public void InitializeProperties(Element obj)
+    {
+        System.Reflection.PropertyInfo[] propertyInfos = obj
+            .GetType()
+            .GetProperties()
+            .Where(elem => elem.PropertyType.BaseType  == typeof(Model) || 
+                           elem.PropertyType.BaseType == typeof(View) || 
+                           elem.PropertyType.BaseType == typeof(Controller))
+            .ToArray();
+
+
+
+        for (int i = 0; i < propertyInfos.Length; i++)
+        {
+            System.Type type = (propertyInfos[i].PropertyType);
+            propertyInfos[i].SetValue(obj, obj.GetComponentInChildren(type));
+            (propertyInfos[i].GetValue(obj) as Element).Initialize();
+            InitializeProperties(propertyInfos[i].GetValue(obj) as Element);
+        }
+    }
+
+
     public void Notify(EventName eventName, params object[] data)
     {
         if (initialEventHandlers != null)
@@ -122,6 +146,7 @@ public class Application : MonoBehaviour
         else
             modelsInitializationList.Add(model);
     }
+    
     public void AddViewToinitializationList(View view)
     {
         if (viewsInitializationList == null)
@@ -137,6 +162,7 @@ public class Application : MonoBehaviour
             controllersInitializationList.Add(controller);
     }
 }
+
 public abstract class Element : MonoBehaviour
 {
     private static Application app;
@@ -149,12 +175,16 @@ public abstract class Element : MonoBehaviour
             return app;
         }
     }
+
+    protected bool initialized;
+    public abstract void Initialize();
+
 }
 public abstract class Controller : Element
 {
-    protected bool initialized;
-    public virtual void Initialize() { }
-    public virtual void DeInitialize() { }
+    //protected bool initialized;
+    //public virtual void Initialize() { }
+    //public virtual void DeInitialize() { }
 
     protected void Awake()
     {
@@ -167,13 +197,13 @@ public abstract class Controller : Element
     {
         if (this is IInitialNotification || this is INotification || this is ILateNotification)
             App.RemoveEventHandler(this);
-        DeInitialize();
+        //DeInitialize();
     }
 }
 public abstract class View : Element
 {
-    protected bool initialized;
-    public abstract void Initialize();
+    //protected bool initialized;
+    //public abstract void Initialize();
 
     protected void Awake()
     {
@@ -183,8 +213,8 @@ public abstract class View : Element
 }
 public abstract class Model : Element
 {
-    protected bool initialized;
-    public abstract void Initialize();
+    //protected bool initialized;
+    //public abstract void Initialize();
 
     protected void Awake()
     {
