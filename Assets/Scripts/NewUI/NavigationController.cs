@@ -54,16 +54,15 @@ public class NavigationController : Controller, INavigation
 
     protected void SwitchOrientation(PageOrientation pageOrientation)
     {
-        //App.AppView.NavigationView.GetComponent<Animator>().Play("Empty");
-        //App.AppView.NavigationView.GetComponent<Animator>().Play("SwitchOrientation");
-        foreach(GameObject page in App.AppModel.NavigationModel.NavigationStack)
+        Stack<GameObject> tempNavigationStack = App.AppModel.NavigationModel.NavigationStack;
+        tempNavigationStack.Reverse();
+        App.AppModel.NavigationModel.NavigationStack = new Stack<GameObject>();
+        while(tempNavigationStack.Count > 0)
         {
-            Page temp = page.GetComponent<Page>();
-            Destroy(temp.content);
-            //
-            GameObject pageContentPrefab = App.AppModel.NavigationModel.GetContent(temp.pageName, pageOrientation);
-            GameObject pageContent = Instantiate(pageContentPrefab, page.transform);
-            temp.content = pageContent;
+            GameObject tempPage = tempNavigationStack.Pop();
+            Page tempPageComponent = tempPage.GetComponent<Page>();
+            Push(tempPageComponent.pageName, tempPageComponent.parameters);
+            Destroy(tempPage);
         }
     }
 
@@ -72,11 +71,13 @@ public class NavigationController : Controller, INavigation
         
     }
 
-    public void Push(PageName pageName)
+    public void Push(PageName pageName, params object[] parameters)
     {
-        GameObject pagePrefab = App.AppModel.NavigationModel.GetPage(pageName);
+        GameObject pagePrefab = App.AppModel.NavigationModel.GetPage(pageName, currentPageOrientation);
         GameObject page = Instantiate(pagePrefab, App.AppView.NavigationView.transform);
-        page.GetComponent<Page>().Initialize();
+        Page pageComponent = page.GetComponent<Page>();
+        pageComponent.parameters = parameters;
+        pageComponent.Initialize();
 
         RectTransform panelRectTransform = page.GetComponent<RectTransform>();
         panelRectTransform.anchorMin = Vector2.zero;
@@ -95,21 +96,16 @@ public class NavigationController : Controller, INavigation
             //temp.SetActive(false);
 
             GameObject prevPage = App.AppModel.NavigationModel.NavigationStack.Peek();
-            prevPage.SetActive(false);
-            //prevPage.GetComponent<Animator>().SetTrigger("Hide");
-            //prevPanel.GetComponent<PanelViewController>().destroyOnHide = false;
-            //prevPanel.SetActive(!prevPanel.GetComponent<PanelViewController>().deactivate);
+            Page prevPageComponent = prevPage.GetComponent<Page>();
+
+            prevPage.GetComponent<Animator>().SetTrigger("Hide");
+            prevPageComponent.destroyOnHide = false;
             prevPageCanvas = prevPage.GetComponent<Canvas>();
         }
         else
             prevPageCanvas = App.AppView.NavigationView.GetComponent<Canvas>();
 
         pageCanvas.sortingOrder = prevPageCanvas.sortingOrder + 1;
-        //
-        GameObject pageContentPrefab = App.AppModel.NavigationModel.GetContent(pageName, currentPageOrientation);
-        GameObject pageContent = Instantiate(pageContentPrefab, page.transform);
-        page.GetComponent<Page>().content = pageContent;
-
         App.AppModel.NavigationModel.NavigationStack.Push(page);
     }
 

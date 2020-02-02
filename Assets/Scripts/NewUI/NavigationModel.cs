@@ -10,15 +10,14 @@ public class NavigationModel : Model
     protected class PagePrefab
     {
         public PageName pageName;
-        public GameObject pagePrefab;
-        public List<ContentPrefab> contentPrefabs;
+        public List<OrientationVariant> orientationVariants;
     }
 
     [System.Serializable]
-    protected class ContentPrefab
+    protected class OrientationVariant
     {
         public PageOrientation pageOrientation;
-        public GameObject contentPrefab;
+        public GameObject pagePrefab;
     }
 
     [SerializeField]
@@ -36,18 +35,14 @@ public class NavigationModel : Model
         pagePrefabs
         .First(page => page.pageName == pageName);
 
-    protected ContentPrefab GetContentPrefab(PageName pageName, PageOrientation pageOrientation) =>
+    protected OrientationVariant GetOrientationVariant(PageName pageName, PageOrientation pageOrientation) =>
         GetPagePrefab(pageName)
-        .contentPrefabs
-        .First(content => content.pageOrientation == pageOrientation);
+        .orientationVariants
+        .First(orientationVariant => orientationVariant.pageOrientation == pageOrientation);
 
-    public GameObject GetPage(PageName pageName) =>
-        GetPagePrefab(pageName)
+    public GameObject GetPage(PageName pageName, PageOrientation pageOrientation) =>
+        GetOrientationVariant(pageName, pageOrientation)
         .pagePrefab;
-
-    public GameObject GetContent(PageName pageName, PageOrientation pageOrientation) =>
-        GetContentPrefab(pageName, pageOrientation)
-        .contentPrefab;
     
 
 }
