@@ -13,4 +13,15 @@ namespace Enums
     {
         DebugSavePanel
     }
+
+    public enum PageName
+    {
+        Test
+    }
+    
+
+    public enum PageOrientation
+    {
+        Portrait, Landscape
+    }
 }

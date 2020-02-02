@@ -5,8 +5,9 @@ using UnityEngine;
 public class ApplicationModel : Model
 {
     public SaveModel SaveModel { get; private set; }
-    public CanvasModel CanvasModel { get; private set; }
+    //public CanvasModel CanvasModel { get; private set; }
     public AudioModel AudioModel { get; private set; }
+    public NavigationModel NavigationModel { get; private set; }
 
     public int TargetFramerate;// { get; set; }
 

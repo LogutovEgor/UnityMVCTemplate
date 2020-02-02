@@ -5,8 +5,9 @@ using Enums;
 
 public class ApplicationController : Controller
 {
-    public CanvasController CanvasController { get; private set; }
+    //public CanvasController CanvasController { get; private set; }
     public AudioController AudioController { get; private set; }
+    public NavigationController NavigationController { get; private set; }
 
     public override void Initialize()
     {
