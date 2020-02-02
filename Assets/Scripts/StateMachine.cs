@@ -1,39 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Enums;
 
-public class StateMachine<T> where T : Controller
+public class StateMachine : Controller
 {
-    public T owner;
-    public State<T> CurrentState { get; private set; } = default;
+    public Controller context;
+    public State CurrentState { get; private set; } = default;
 
-    public StateMachine(T owner)
+
+    public override void Initialize()
     {
-        this.owner = owner;
-    }
-    public void NotifyCurrentState(EventName eventName, params object[] data)
-    {
-        CurrentState.OnNotification(owner, eventName, data);
+        
     }
 
-    public void ChangeState(State<T> newState, params object[] data)
+
+    public void ChangeState<T>(params object[] data) where T : State
     {
         if (CurrentState != null)
-            CurrentState.ExitState(owner);
-        CurrentState = newState;
-        CurrentState.EnterState(owner, data);
-    }
-    public void Update()
-    {
-        if (CurrentState != null)
-            CurrentState.UpdateState(owner);
+        {
+            CurrentState.ExitState();
+            Destroy(CurrentState.gameObject);
+        }
+        GameObject stateGameObject = new GameObject("currentState", typeof(T));
+        stateGameObject.transform.SetParent(transform);
+
+        T state = stateGameObject.GetComponent<T>();
+        state.StateMachine = this;
+        CurrentState = state;
+        CurrentState.EnterState(data);
     }
 }
-public abstract class State<T> where T : Controller
+public abstract class State : Controller
 {
-    public abstract void OnNotification(T owner, EventName eventName, params object[] data);
-    public abstract void EnterState(T owner, params object[] data);
-    public abstract void UpdateState(T owner, params object[] data);
-    public abstract void ExitState(T owner, params object[] data);
+    public StateMachine StateMachine { get; set; }
+
+    public abstract void EnterState(params object[] data);
+    public abstract void ExitState(params object[] data);
 }

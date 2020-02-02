@@ -31,7 +31,7 @@ public class DebugSavePanel : PanelViewController, ISelfInitialize
     public void ChangeSaveVer()
     {
         //Debug.Log(inputField.text);
-        App.AppModel.SaveModel.currentVersion = int.Parse(inputField.text);
+        //App.AppModel.SaveModel.currentVersion = int.Parse(inputField.text);
         UpdatePanel();
     }
     public void InitializeSave()
@@ -48,8 +48,8 @@ public class DebugSavePanel : PanelViewController, ISelfInitialize
 
     public void UpdatePanel()
     {
-        currentVersionTextComponent.text = "Cur ver: " + App.AppModel.SaveModel.currentVersion;
-        databaseVersionTextComponent.text = "DB ver: " + App.AppModel.SaveModel.GetDatabaseVersion();
+        //currentVersionTextComponent.text = "Cur ver: " + App.AppModel.SaveModel.currentVersion;
+        //databaseVersionTextComponent.text = "DB ver: " + App.AppModel.SaveModel.GetDatabaseVersion();
         saveTextComponent.text = App.AppModel.SaveModel.SaveToString();
     }
 }
