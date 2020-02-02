@@ -392,6 +392,7 @@ GameObject:
   m_Component:
   - component: {fileID: 874784549}
   - component: {fileID: 874784550}
+  - component: {fileID: 874784551}
   m_Layer: 0
   m_Name: controller
   m_TagString: Untagged
@@ -426,6 +427,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82b2fdf5a6a63af4f8a700f159c234d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &874784551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 874784548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64735082a9c5b864191b8b889d5a9ed4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &879108654
@@ -1503,4 +1516,10 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4827346784008145047, guid: 05697028ae35d144b8e6fb244b195fe1,
     type: 3}
   m_PrefabInstance: {fileID: 4119051901677223314}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &9149625617217871235 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4629711342387245668, guid: 93175059998102044a1293193976f27a,
+    type: 3}
+  m_PrefabInstance: {fileID: 4519936078282715111}
   m_PrefabAsset: {fileID: 0}

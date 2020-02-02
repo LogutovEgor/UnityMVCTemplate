@@ -10,6 +10,7 @@ public class ApplicationModel : Model
     public NavigationModel NavigationModel { get; private set; }
 
     public int TargetFramerate;// { get; set; }
+    public bool CLI;
 
     public override void Initialize()
     {
