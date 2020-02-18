@@ -6,5 +6,7 @@ public class TestPage : Page
 {
     public override void Initialize()
     {
+        base.Initialize();
+        //
     }
 }

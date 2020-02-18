@@ -15,8 +15,8 @@ public class NavigationController : Controller, INavigation
         else
             currentPageOrientation = PageOrientation.Landscape;
         Push(PageName.Test);
-        Push(PageName.Test);
-        Push(PageName.Test);
+        //Push(PageName.Test);
+        //Push(PageName.Test);
     }
 
     public void Update()
@@ -27,6 +27,7 @@ public class NavigationController : Controller, INavigation
             {
                 currentPageOrientation = ToPageOrientation(Input.deviceOrientation);
                 SwitchOrientation(currentPageOrientation);
+                
             }
         }
         else
@@ -54,6 +55,12 @@ public class NavigationController : Controller, INavigation
 
     protected void SwitchOrientation(PageOrientation pageOrientation)
     {
+        //
+        if (pageOrientation == PageOrientation.Landscape)
+            Screen.orientation = ScreenOrientation.Landscape;
+        else if (pageOrientation == PageOrientation.Portrait)
+            Screen.orientation = ScreenOrientation.Portrait;
+        //
         Stack<GameObject> tempNavigationStack = App.AppModel.NavigationModel.NavigationStack;
         tempNavigationStack.Reverse();
         App.AppModel.NavigationModel.NavigationStack = new Stack<GameObject>();
@@ -61,22 +68,44 @@ public class NavigationController : Controller, INavigation
         {
             GameObject tempPage = tempNavigationStack.Pop();
             Page tempPageComponent = tempPage.GetComponent<Page>();
-            Push(tempPageComponent.pageName, tempPageComponent.parameters);
+            Push(tempPageComponent.pageName, tempPageComponent.arguments);
             Destroy(tempPage);
         }
     }
 
     public void Pop()
     {
-        
+        if (App.AppModel.NavigationModel.NavigationStack.Count == 1)
+            return;
+
+        GameObject page = App.AppModel.NavigationModel.NavigationStack.Pop();
+        Page pageComponent = page.GetComponent<Page>();
+
+        if (pageComponent.playAnim)
+        {
+            pageComponent.destroyOnHide = true;
+            pageComponent.animator.Play("Hide");
+        }
+        else
+            Destroy(page);
+
+        if (App.AppModel.NavigationModel.NavigationStack.Count > 0)
+        {
+            GameObject prevPage = App.AppModel.NavigationModel.NavigationStack.Peek();
+            Page prevPageComponent = prevPage.GetComponent<Page>();
+
+            if(prevPageComponent.playAnim)
+                prevPageComponent.animator.Play("Show");
+            prevPage.SetActive(true);
+        }
     }
 
-    public void Push(PageName pageName, params object[] parameters)
+    public void Push(PageName pageName, NavigationArguments arguments = default)
     {
         GameObject pagePrefab = App.AppModel.NavigationModel.GetPage(pageName, currentPageOrientation);
         GameObject page = Instantiate(pagePrefab, App.AppView.NavigationView.transform);
         Page pageComponent = page.GetComponent<Page>();
-        pageComponent.parameters = parameters;
+        pageComponent.arguments = arguments;
         pageComponent.Initialize();
 
         RectTransform panelRectTransform = page.GetComponent<RectTransform>();
@@ -85,6 +114,9 @@ public class NavigationController : Controller, INavigation
 
         panelRectTransform.offsetMin = Vector2.zero;
         panelRectTransform.offsetMax = Vector2.zero;
+
+        if (pageComponent.playAnim)
+            pageComponent.GetComponent<Animator>().Play("Show");
 
         Canvas pageCanvas = page.GetComponent<Canvas>();
         Canvas prevPageCanvas = default;
@@ -98,7 +130,11 @@ public class NavigationController : Controller, INavigation
             GameObject prevPage = App.AppModel.NavigationModel.NavigationStack.Peek();
             Page prevPageComponent = prevPage.GetComponent<Page>();
 
-            prevPage.GetComponent<Animator>().SetTrigger("Hide");
+
+            //prevPage.GetComponent<Animator>().SetTrigger("Hide");
+            if (prevPageComponent.playAnim)
+                prevPage.GetComponent<Animator>().Play("Hide");
+
             prevPageComponent.destroyOnHide = false;
             prevPageCanvas = prevPage.GetComponent<Canvas>();
         }

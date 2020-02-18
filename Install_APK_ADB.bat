@@ -1,15 +1,15 @@
 setlocal
 set ANDROIDHOME=%ANDROID_HOME%
-if "%ANDROIDHOME%"=="" set ANDROIDHOME=D:/SDK
+if "%ANDROIDHOME%"=="" set ANDROIDHOME=E:/SDK
 set ADB=%ANDROIDHOME%\platform-tools\adb.exe
 set DEVICE=
 if not "%1"=="" set DEVICE=-s %1
 @echo.
 @echo Uninstalling existing application. Failures here can almost always be ignored.
-%ADB% %DEVICE% uninstall com.CompanyName.AppName
+%ADB% %DEVICE% uninstall com.DefaultCompany.UnityMVCTemplate
 @echo.
 @echo Installing existing application. Failures here indicate a problem with the device (connection or storage permissions) and are fatal.
-%ADB% %DEVICE% install ApkName.apk
+%ADB% %DEVICE% install test.apk
 @if "%ERRORLEVEL%" NEQ "0" goto Error
 
 

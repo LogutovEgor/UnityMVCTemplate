@@ -912,6 +912,7 @@ MonoBehaviour:
   pageName: 0
   pageOrientation: 0
   deactivateOnHide: 1
+  playAnim: 0
   destroyOnHide: 0
 --- !u!95 &9058239176404371676
 Animator:

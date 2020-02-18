@@ -6,17 +6,29 @@ using Enums;
 public abstract class Page : Controller
 {
     [HideInInspector]
-    public object[] parameters;
+    public NavigationArguments arguments;
+
     [HideInInspector]
     public PageName pageName;
+
     [HideInInspector]
     public PageOrientation pageOrientation;
+
+    [HideInInspector]
+    public bool destroyOnHide = false;
+
     protected INavigation Navigation;
+
+    [HideInInspector]
+    public Animator animator;
 
     public bool deactivateOnHide;
     public bool playAnim;
-    [HideInInspector]
-    public bool destroyOnHide = false;
+
+    public override void Initialize()
+    {     
+        animator = gameObject.GetComponent<Animator>();
+    }
 
 
     protected virtual void OnShowAnimEnd() { }
@@ -34,8 +46,51 @@ public abstract class Page : Controller
 
 public interface INavigation
 {
-    void Push(PageName page, params object[] parameters);
+    void Push(PageName page, NavigationArguments arguments = default);
+    //
     void Pop();
     void PopToRoot();
+}
+
+public class NavigationArguments
+{
+    protected Dictionary<string, object> arguments;
+
+    public NavigationArguments()
+    {
+        arguments = new Dictionary<string, object>();
+    }
+
+    public void Put(string key, object value)
+    {
+        arguments.Add(key, value);
+    }
+
+    public object Get(string key)
+    {
+        if (arguments.ContainsKey(key))
+            return arguments[key];
+        return null;
+    }
+
+    public string GetString(string key)
+    {
+        return Get(key) as string;
+    }
+
+    public int GetInt(string key)
+    {
+        return (int)Get(key);
+    }
+
+    public float GetFloat(string key)
+    {
+        return (float)Get(key);
+    }
+
+    public bool GetBool(string key)
+    {
+        return (bool)Get(key);
+    }
 }
 
