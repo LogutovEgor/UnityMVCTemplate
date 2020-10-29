@@ -14,7 +14,7 @@ public class StateMachine : Controller
 
     public override void Initialize(Arguments arguments = null)
     {
-        parentController = arguments.Get<Controller>(ArgumentKey.Controller);
+        parentController = arguments.Get<Controller>(ArgumentKey.CONTROLLER);
     }
 
     public void ChangeState(Type newState, Arguments arguments = null)
@@ -30,7 +30,7 @@ public class StateMachine : Controller
         currentState.transform.SetAsFirstSibling();
         if (arguments == null)
             arguments = Arguments.Create();
-        currentState.Initialize(arguments.Put(ArgumentKey.StateMachine, this));
+        currentState.Initialize(arguments.Put(ArgumentKey.STATE_MACHINE, this));
         //
         currentState.EnterState(arguments);
     }

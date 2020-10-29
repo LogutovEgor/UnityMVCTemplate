@@ -7,6 +7,7 @@ public class ApplicationModel : Model
     public SaveModel SaveModel { get; private set; }
     public NavigationModel NavigationModel { get; private set; }
     public AudioModel AudioModel { get; private set; }
+    public AdsModel AdsModel { get; private set; }
 
     public int TargetFramerate { get; set; }
 

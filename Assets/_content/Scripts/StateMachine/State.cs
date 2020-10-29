@@ -9,7 +9,7 @@ public abstract class State : Controller
 
     public override void Initialize(Arguments arguments = null)
     {
-        stateMachine = arguments.Get<StateMachine>(ArgumentKey.StateMachine);
+        stateMachine = arguments.Get<StateMachine>(ArgumentKey.STATE_MACHINE);
         //
     }
 

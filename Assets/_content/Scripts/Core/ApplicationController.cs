@@ -7,6 +7,7 @@ public class ApplicationController : Controller
 {
     public AudioController AudioController { get; private set; }
     public NavigationController NavigationController { get; private set; }
+    public AdsController AdsController { get; private set; }
 
     public override void Initialize(Arguments arguments = default)
     {

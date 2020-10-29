@@ -7,7 +7,8 @@ namespace Enums
     public enum EventName
     {
         Event1,
-        OnPageOpen
+        OnPageOpen,
+        OnAdsDisabled
     }
 
     public enum PrefabName

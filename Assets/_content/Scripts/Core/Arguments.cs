@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System;
 using Enums;
+using UnityEngine;
 
-namespace Enums
+public static partial class ArgumentKey
 {
-    public enum ArgumentKey
-    {
-        Model, View, Controller, InstanceID, Direction, Speed, Text, Collider2D, AirplaneBotController,
-        StartPosition, TargetPosition, Vector3List, StateMachine,
-        TeamNumber, MachineGunInfo, MotorInfo, AirplaneInfo, WorldAreaInfo, Vector3Int, Damage
-    }
+    public const string MODEL = "MODEL";
+    public const string VIEW = "VIEW";
+    public const string CONTROLLER = "CONTROLLER";
+    public const string STATE_MACHINE = "STATE_MACHINE";
 }
+
 
 public class Arguments
 {
@@ -29,12 +29,6 @@ public class Arguments
         return this;
     }
 
-    public Arguments Put(ArgumentKey key, object value)
-    {
-        arguments.Add(key.ToString(), value);
-        return this;
-    }
-
     //public object Get(string key)
     //{
     //    if (arguments.ContainsKey(key))
@@ -48,14 +42,5 @@ public class Arguments
         //if (!arguments.ContainsKey(key))
         //    throw new Exception($"Arguments does not contain {key}");
         return (T)arguments[key];
-    }
-
-    public T Get<T>(ArgumentKey key)
-    {
-        string keyStr = key.ToString();
-        _ = !arguments.ContainsKey(keyStr) ? throw new Exception($"Arguments does not contain {key}") : true;
-        //if (!arguments.ContainsKey(key))
-        //    throw new Exception($"Arguments does not contain {key}");
-        return (T)arguments[keyStr];
     }
 }

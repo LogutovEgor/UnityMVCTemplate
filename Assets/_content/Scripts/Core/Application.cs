@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Enums;
 using System.Linq;
-using System;
+using UnityEngine.UI;
 
 
 public class Application : MonoBehaviour
@@ -26,6 +26,10 @@ public class Application : MonoBehaviour
     [SerializeField] private List<View> viewsInitializationList;
     [SerializeField] private List<Controller> controllersInitializationList;
 
+    [SerializeField]
+    private Text debugText;
+    public void AppendDebugText(string value) => debugText.text += value;
+
     private void Start()
     {
         Instance = this;
@@ -36,8 +40,6 @@ public class Application : MonoBehaviour
     {
         InitializeElements();
     }
-
-    public UnityEngine.UI.Text debugText;
 
     private void Initialize()
     {
